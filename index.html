@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cross</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+<link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet'>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+<script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+<script src='https://cdn.rawgit.com/admsev/jquery-play-sound/master/jquery.playSound.js'></script>
+<script src="/socket.io/socket.io.js"></script>
+<style>
+html, body, #flesh {
+	position: relative;
+	margin: 0;
+	height: auto;
+	width: 100%;
+	/*  background: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/40713/hand-xray-flesh.jpg") no-repeat;*/
+	background-size: 100% auto;
+	background-color: black;
+}
+#boxy {
+	width: 100%;
+	margin: 0;
+	-webkit-mask-image: url("mask.png");
+	mask-image: url("mask.png");
+	-webkit-mask-repeat: no-repeat;
+	mask-repeat: no-repeat;
+	-webkit-mask-size: 300px;
+	mask-origin: content-box;
+	cursor: none;
+	-webkit-mask-position-x: 300px;
+	-webkit-mask-position-y: 300px;
+	position: absolute;
+}
+* {
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+/*#boxy {
+	width: 100px;
+	height: 100px;
+	background: skyblue;
+	position: absolute;
+	left: 1500px;
+	top: 500px;
+	border-radius: 50px;
+}*/
+#hotspot1 {
+	font-size: 20px;
+	color: white;
+	width: 130px;
+	height: 130px;
+	 background: red;  
+	position: absolute;
+	left: 100px;
+	top: 200px;
+	opacity: 10%; /* ADJUST OPACITY TO HIDE HOTSPOT*/
+	border-radius: 0px;
+}
+#hotspot2 {
+	font-size: 20px;
+	color: white;
+	
+	width: 130px;
+	height: 130px;
+		 background: green; 
+	position: absolute;
+	left: 600px;
+	top: 300px;
+	opacity: 10%;/* ADJUST OPACITY TO HIDE HOTSPOT*/
+	border-radius: 0px;
+}
+	
+	#hotspot3 {
+		font-size: 20px;
+	color: white;
+	width: 130px;
+	height: 130px;
+		 background: blue; 
+	position: absolute;
+	left: 300px;
+	top: 100px;
+	opacity: 10%;/* ADJUST OPACITY TO HIDE HOTSPOT*/
+	border-radius: 0px;
+}
+#result {
+	color: white;
+	padding: 20px;
+	font-size: 20px;
+	font-family: Gotham, "Helvetica Neue", Helvetica, Arial, "sans-serif"
+}
+#result2 {
+	color: white;
+	padding: 20px;
+	font-size: 20px;
+	font-family: Gotham, "Helvetica Neue", Helvetica, Arial, "sans-serif"
+}
+#player {
+	width: 60px;
+	height: 60px;
+	background: purple;
+	color: white;
+	top: 200px;
+	left: 200px;
+	position: relative;
+}
+#shutdown {
+	width: 500px;
+	height: 100px;
+	background: red;
+}
+#mybtn {
+	position: absolute
+}
+</style>
+</head>
+
+<body>
+<div id="flesh">
+  <div id="hotspot1">1</div>
+  <div id="hotspot2">2</div>
+	  <div id="hotspot3">3</div>
+  <img id="boxy" src="before.png" > </div>
+<p id="showData"></p>
+	
+<script>
+  
+	function random_hotspot1() {
+ 
+		var x = Math.floor((Math.random() * 700) + 1);
+		var y = Math.floor((Math.random() * 300) + 100);
+		 document.getElementById("hotspot1").style.left = x +"px";
+		 document.getElementById("hotspot1").style.top = y +"px";
+}
+	
+	function random_hotspot2() {
+ 
+		var x = Math.floor((Math.random() * 700) + 1);
+		var y = Math.floor((Math.random() * 300) + 100);
+		 document.getElementById("hotspot2").style.left = x +"px";
+		 document.getElementById("hotspot2").style.top = y +"px";
+}
+	
+		function random_hotspot3() {
+ 
+		var x = Math.floor((Math.random() * 700) + 1);
+		var y = Math.floor((Math.random() * 300) + 100);
+		 document.getElementById("hotspot3").style.left = x +"px";
+		 document.getElementById("hotspot3").style.top = y +"px";
+}
+	
+	
+    $(document).ready(function() {
+      var socket = io.connect();
+      
+      socket.on('passDesk', function() {
+        console.log("DESKTOP GOT IT");
+        window.location = "end";
+      });
+
+      socket.on('desktopMoveLR', function(mobileLR, mobileFB) {
+      
+		    $('#boxy').css('-webkit-mask-position-x', 30*mobileLR+50);
+      $('#boxy').css('-webkit-mask-position-y', -15*mobileFB+50)
+		  
+		 
+		  
+      })
+		
+	
+		 
+	var checksound = false;	
+		
+		
+		    function collision($boxy, $hotspot1) {
+      var x1 =  $('#boxy').css('mask-position-x').replace(/[^-\d\.]/g, '');
+      var y1 = $('#boxy').css('mask-position-y').replace(/[^-\d\.]/g, '');
+      var h1 = $('#boxy').css('-webkit-mask-size').replace(/[^-\d\.]/g, '');
+      var w1 = $('#boxy').css('-webkit-mask-size').replace(/[^-\d\.]/g, '');
+      var b1 = y1 + h1;
+      var r1 = x1 + w1;
+      var x2 = $hotspot1.offset().left;
+      var y2 = $hotspot1.offset().top;
+      var h2 = $hotspot1.outerHeight(true);
+      var w2 = $hotspot1.outerWidth(true);
+      var b2 = y2 + h2;
+      var r2 = x2 + w2;
+				
+			console.log(x1);	
+				console.log(y1);
+				console.log(x2);
+				console.log(y2);
+        
+      if (b1 < y2 || y1 > b2 || r1 < x2 || x1 > r2) 
+		  
+		  
+		   
+			 return false;
+      return 'yellow';	
+	 
+				
+	
+    }
+		
+			    function collision2($boxy, $hotspot2) {
+       var x1 =  $('#boxy').css('mask-position-x').replace(/[^-\d\.]/g, '');
+      var y1 = $('#boxy').css('mask-position-y').replace(/[^-\d\.]/g, '');
+      var h1 = $('#boxy').css('-webkit-mask-size').replace(/[^-\d\.]/g, '');
+      var w1 = $('#boxy').css('-webkit-mask-size').replace(/[^-\d\.]/g, '');
+      var b1 = y1 + h1;
+      var r1 = x1 + w1;
+      var xa = $hotspot2.offset().left;
+      var ya = $hotspot2.offset().top;
+      var ha = $hotspot2.outerHeight(true);
+      var wa = $hotspot2.outerWidth(true);
+      var ba = ya + ha;
+      var ra = xa + wa;
+        
+      if (b1 < ya || y1 > ba || r1 < xa || x1 > ra) 
+     
+			  
+			   return false;
+      return 'yellow';
+	 
+		  
+				
+	
+    }
+		
+		
+		  function collision3($boxy, $hotspot3) {
+       var x1 =  $('#boxy').css('mask-position-x').replace(/[^-\d\.]/g, '');
+      var y1 = $('#boxy').css('mask-position-y').replace(/[^-\d\.]/g, '');
+      var h1 = $('#boxy').css('-webkit-mask-size').replace(/[^-\d\.]/g, '');
+      var w1 = $('#boxy').css('-webkit-mask-size').replace(/[^-\d\.]/g, '');
+      var b1 = y1 + h1;
+      var r1 = x1 + w1;
+      var xa = $hotspot3.offset().left;
+      var ya = $hotspot3.offset().top;
+      var ha = $hotspot3.outerHeight(true);
+      var wa = $hotspot3.outerWidth(true);
+      var ba = ya + ha;
+      var ra = xa + wa;
+        
+      if (b1 < ya || y1 > ba || r1 < xa || x1 > ra) 
+     
+			  
+			    return false;
+      return 'yellow';
+	 
+		  
+				
+	
+    }
+		
+		
+		
+		
+	
+
+		
+		//SOUND FOR HOTSPOT 1
+		 	
+	 function runsound1(){
+		 $.playSound("http://freesound.org/data/previews/457/457518_4256189-lq.mp3"); //PUT YOUR SOUND LINK HERE FOR ONLINE SOUND//
+	 }
+		
+		//SOUND FOR HOTSPOT 2
+		
+		 function runsound2(){
+		$.playSound('http://freesound.org/data/previews/352/352651_4019029-lq.mp3'); 
+	 }
+	 //SOUND FOR HOTSPOT 3
+		
+		 function runsound3(){
+			 
+			$.playSound("test.mp3"); // OR PLACE YOUR SOUND FILE IN THE "PUBLIC" FOLDER AND WRITE THE FILE NAME HERE
+			
+			  
+	 }
+		 
+		
+	// WHAT HAPPENS WHEN THEY COLLIDE
+		
+		window.setInterval(function() {
+	 var maskx =   $('#boxy').css('-webkit-mask-size');
+//console.log(maskx);
+ $('#boxy').css("border-color",(collision2($('#boxy'), $('#hotspot2'))));
+			
+ $('#boxy').css("border-color",(collision($('#boxy'), $('#hotspot1'))));
+ $("#boxy").attr("src","before.png"); // IMAGE OF THE CURRENT LIGHT BALL
+ 	
+			 
+		 
+		 
+			
+			if(collision($('#boxy'), $('#hotspot1'))){
+		 runsound1();
+	$("#boxy").attr("src","reveal.gif"); // HERE IS THE IMAGE SHOWN WHEN HOTSPOT 1 IS HIT 
+		  random_hotspot1();
+	 
+		}
+			
+	  
+			
+			
+			if(collision2($('#boxy'), $('#hotspot2'))){
+			 runsound2();
+			
+				$("#boxy").attr("src","reveal2.jpg");  // HERE IS THE IMAGE SHOWN WHEN HOTSPOT 2 IS HIT 
+				 random_hotspot2();
+				
+		}
+			
+			
+				
+			if(collision3($('#boxy'), $('#hotspot3'))){
+			 runsound3();
+			
+				$("#boxy").attr("src","reveal3.jpg"); // HERE IS THE IMAGE SHOWN WHEN HOTSPOT 3 IS HIT 
+				 random_hotspot3();
+				
+		}
+			
+	  	
+	
+}, 500);
+		
+
+ 
+		
+		
+		
+		  
+    })
+	
+	 
+	
+	
+  </script> 
+
+<!--
+<p>
+  Please remember to remove .mp3 file extension.
+</p>
+<button onclick='$.playSound('/public/shutdown.mp3')'>Play</button>
+-->
+</body>
+</html>

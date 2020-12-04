@@ -1,0 +1,15 @@
+{
+  "name": "controller",
+  "version": "1.0.0",
+  "description": "Controll cross platform",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jam inPie",
+  "license": "ISC",
+  "dependencies": {
+    "socket.io": "*",
+    "express": "*"
+  }
+}
